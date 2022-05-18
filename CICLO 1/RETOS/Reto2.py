@@ -1,12 +1,11 @@
 def cliente(informacion:dict)->dict:
     """ aventuras extremas 
-
     Args:
         informacion (dict): diccionario con datos de cliente 
-
     Returns:
         dict: con la informacion de la atraccion y precio de la misma
     """  
+    
     if informacion['edad'] >18 and informacion['primer_ingreso']== True: 
         valor_boleta=20000 - (20000 * 0.05) 
         atraccion = 'X-Treme'
@@ -54,8 +53,6 @@ def cliente(informacion:dict)->dict:
     
     
 # pruebas para validar el codigo
-    
-    
 cli1 = {
     'id_cliente': 1,
     'nombre': 'johana fernandez', 
