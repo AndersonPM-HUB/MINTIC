@@ -1,3 +1,3 @@
-import easygui 
+print("James" * 3)
 
 

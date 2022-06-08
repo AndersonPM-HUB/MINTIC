@@ -3,7 +3,6 @@ from functools import reduce
 
 def ordenes(rutinaContable : list):
     diccionario ={}
-    
     #Suma el total de cada tupla 
     for registro in rutinaContable:
         for item in registro:  
