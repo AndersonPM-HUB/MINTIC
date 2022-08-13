@@ -5,6 +5,7 @@
 package Modelo;
 
 import Clases.Mascota;
+import Clases.MascotasporEspecie;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -116,7 +117,7 @@ public class MdMascota {
         LinkedList<Mascota> listaMascotas = new LinkedList<>();
         
         try ( Connection conn = DriverManager.getConnection(dbData.getUrl(), dbData.getUser(), dbData.getPassword())) {
-            String consulta = "SELECT * FROM cliente";
+            String consulta = "SELECT * FROM mascota";
             PreparedStatement statement = conn.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
            
             ResultSet result = statement.executeQuery();
@@ -138,5 +139,29 @@ public class MdMascota {
         } catch (Exception e) {
         }
         return listaMascotas;
+    }
+    
+    public LinkedList<MascotasporEspecie>  buscarEspecieMascotas() {
+        LinkedList<MascotasporEspecie> mascotasporEspecie = new LinkedList<>();
+        
+        try ( Connection conn = DriverManager.getConnection(dbData.getUrl(), dbData.getUser(), dbData.getPassword())) {
+            String consulta = "SELECT especie, count(especie) FROM mascota GROUP BY especie";
+            PreparedStatement statement = conn.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
+           
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                MascotasporEspecie registro = new MascotasporEspecie();
+                                
+                String especie = result.getString(1);
+                int cantidad = result.getInt(2);
+                
+                registro.setEspecie(especie);
+                registro.setCantidadMascotasporEspecie(cantidad);
+                mascotasporEspecie.add(registro);
+            }
+            return mascotasporEspecie;
+        } catch (Exception e) {
+        }
+        return mascotasporEspecie;
     }
 }

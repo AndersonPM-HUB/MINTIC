@@ -5,6 +5,7 @@
 package Controlador;
 
 import Clases.Mascota;
+import Clases.MascotasporEspecie;
 import Modelo.MdMascota;
 import java.util.LinkedList;
 
@@ -51,6 +52,11 @@ public class CtMascota {
 
         }
         return resultado;
+    }
+    
+    public LinkedList<MascotasporEspecie> buscarEspecieMascotas(){
+        LinkedList<MascotasporEspecie> reporte = this.MdMascota.buscarEspecieMascotas();
+        return reporte;
     }
 
 }

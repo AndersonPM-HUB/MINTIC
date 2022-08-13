@@ -10,9 +10,11 @@ package Clases;
  */
 public class Plan {
 
+    private int idPk;
     private String codigo;
     private String nombre;
     private int precio;
+    
 
     public Plan(String codigo, String nombre, int precio) {
         this.codigo = codigo;
@@ -61,6 +63,20 @@ public class Plan {
      */
     public void setPrecio(int precio) {
         this.precio = precio;
+    }
+
+    /**
+     * @return the idPk
+     */
+    public int getIdPk() {
+        return idPk;
+    }
+
+    /**
+     * @param idPk the idPk to set
+     */
+    public void setIdPk(int idPk) {
+        this.idPk = idPk;
     }
 
 }

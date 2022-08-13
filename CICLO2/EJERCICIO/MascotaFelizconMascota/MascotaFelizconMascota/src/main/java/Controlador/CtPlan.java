@@ -6,6 +6,7 @@ package Controlador;
 
 import Clases.*;
 import Modelo.*;
+import java.util.LinkedList;
 
 /**
  *
@@ -41,6 +42,16 @@ public class CtPlan {
     
     public boolean borrarPlan(Plan p){
         return this.MdPlan.borrarPlan(p);
+    }
+    
+    public LinkedList<Plan> listarTodosPlan() {
+        LinkedList<Plan> resultado = new LinkedList();
+        try {
+            resultado = this.MdPlan.buscarTodosPlanes();
+        } catch (Exception e) {
+
+        }
+        return resultado;
     }
 
 }

@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.LinkedList;
 
 /**
  *
@@ -97,6 +98,31 @@ public class MdPlan {
         } catch (Exception e) {
             return false;
         }
+    }
+    public LinkedList<Plan>  buscarTodosPlanes() {
+        LinkedList<Plan> listaPlanes = new LinkedList<>();
+        
+        try ( Connection conn = DriverManager.getConnection(dbData.getUrl(), dbData.getUser(), dbData.getPassword())) {
+            String consulta = "SELECT * FROM plan";
+            PreparedStatement statement = conn.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
+           
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                int idPk = result.getInt(1);
+                
+                String codigo = result.getString(2);
+                String nombre = result.getString(3);
+                int precio = result.getInt(4);                
+                
+                Plan p = new Plan(codigo, nombre, precio);
+                p.setIdPk(idPk);
+                
+                listaPlanes.add(p);
+            }
+            return listaPlanes;
+        } catch (Exception e) {
+        }
+        return listaPlanes;
     }
 
 }

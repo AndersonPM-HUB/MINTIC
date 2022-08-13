@@ -6,11 +6,27 @@ package Vista;
 
 import Clases.*;
 import Controlador.*;
+import java.awt.BorderLayout;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import static java.lang.System.in;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
 
 /**
  *
@@ -21,6 +37,7 @@ public class Vista extends javax.swing.JFrame {
     CtPlan CtPlan;
     CtCliente CtCliente;
     CtMascota CtMascota;
+    CtPago CtPago;
     LinkedList<Cliente> clienteComboBox;
     LinkedList<Mascota> mascotaComboBox;
     LinkedList<Plan> planComboBox;
@@ -34,9 +51,12 @@ public class Vista extends javax.swing.JFrame {
         this.CtPlan = new CtPlan();
         this.CtCliente = new CtCliente();
         this.CtMascota = new CtMascota();
+        this.CtPago = new CtPago();
         recargarComboBoxCliente();
         recargarComboBoxMascota();
         recargarComboBoxPlan();
+        refrescarGraficaMascotaporEspecie();
+        llenarListaMascotas();
 
     }
 
@@ -110,6 +130,14 @@ public class Vista extends javax.swing.JFrame {
         fechaPago = new javax.swing.JTextField();
         pagoMascota = new javax.swing.JComboBox<>();
         pagoPlan = new javax.swing.JComboBox<>();
+        jLabel19 = new javax.swing.JLabel();
+        idPago = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        mascotasporEspecie = new javax.swing.JPanel();
+        reporteMascotas = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        listaMascotas = new javax.swing.JList<>();
+        exportarMascotas = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -201,7 +229,7 @@ public class Vista extends javax.swing.JFrame {
                 .addGroup(jPanelPlanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(precioPlan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 97, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 100, Short.MAX_VALUE)
                 .addGroup(jPanelPlanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCrearPlan)
                     .addComponent(btnConsultarPlan)
@@ -321,7 +349,7 @@ public class Vista extends javax.swing.JFrame {
                 .addGroup(jPanelClienteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(TelefonoCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
                 .addGroup(jPanelClienteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCrearCliente)
                     .addComponent(btnConsultarCliente)
@@ -393,7 +421,12 @@ public class Vista extends javax.swing.JFrame {
             }
         });
 
-        especieMascota.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Canino", "Felino" }));
+        especieMascota.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Canino", "Felino", "Reptil", "Ave", "Pez" }));
+        especieMascota.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                especieMascotaActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelMascotaLayout = new javax.swing.GroupLayout(jPanelMascota);
         jPanelMascota.setLayout(jPanelMascotaLayout);
@@ -438,7 +471,7 @@ public class Vista extends javax.swing.JFrame {
         jPanelMascotaLayout.setVerticalGroup(
             jPanelMascotaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMascotaLayout.createSequentialGroup()
-                .addContainerGap(17, Short.MAX_VALUE)
+                .addContainerGap(20, Short.MAX_VALUE)
                 .addGroup(jPanelMascotaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(codigoMascota, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -482,12 +515,32 @@ public class Vista extends javax.swing.JFrame {
         });
 
         btnConsultarPago.setText("Consultar");
+        btnConsultarPago.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConsultarPagoActionPerformed(evt);
+            }
+        });
 
         btnModificarPago.setText("Modificar");
+        btnModificarPago.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarPagoActionPerformed(evt);
+            }
+        });
 
         btnBorrarPago.setText("Borrar");
+        btnBorrarPago.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBorrarPagoActionPerformed(evt);
+            }
+        });
 
         btnLimpiarPago.setText("Limpiar");
+        btnLimpiarPago.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLimpiarPagoActionPerformed(evt);
+            }
+        });
 
         jLabel15.setText("Fecha de pago");
 
@@ -505,6 +558,10 @@ public class Vista extends javax.swing.JFrame {
         });
 
         pagoPlan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel19.setText("Id Pago");
+
+        jLabel20.setText("Diligenciar este campo solo para consultar");
 
         javax.swing.GroupLayout jPanelPagoLayout = new javax.swing.GroupLayout(jPanelPago);
         jPanelPago.setLayout(jPanelPagoLayout);
@@ -524,24 +581,34 @@ public class Vista extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btnLimpiarPago))
                     .addGroup(jPanelPagoLayout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel15)
+                        .addGap(21, 21, 21)
+                        .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel16)
                             .addComponent(jLabel17)
-                            .addComponent(jLabel18))
+                            .addComponent(jLabel18)
+                            .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(31, 31, 31)
-                        .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(fechaPago, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(numeroCuotas, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pagoPlan, 0, 224, Short.MAX_VALUE)
-                            .addComponent(pagoMascota, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pagoPlan, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pagoMascota, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanelPagoLayout.createSequentialGroup()
+                                .addComponent(idPago, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(29, 29, 29)
+                                .addComponent(jLabel20))
+                            .addComponent(fechaPago)
+                            .addComponent(numeroCuotas))))
+                .addGap(67, 67, 67))
         );
         jPanelPagoLayout.setVerticalGroup(
             jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelPagoLayout.createSequentialGroup()
-                .addGap(34, 34, 34)
+                .addContainerGap(30, Short.MAX_VALUE)
+                .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel19)
+                    .addComponent(idPago, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel20))
+                .addGap(15, 15, 15)
                 .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel15)
                     .addComponent(fechaPago, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -557,7 +624,7 @@ public class Vista extends javax.swing.JFrame {
                 .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel18)
                     .addComponent(pagoPlan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(jPanelPagoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCrearPago)
                     .addComponent(btnConsultarPago)
@@ -569,21 +636,71 @@ public class Vista extends javax.swing.JFrame {
 
         mascota.addTab("Pago", jPanelPago);
 
+        javax.swing.GroupLayout mascotasporEspecieLayout = new javax.swing.GroupLayout(mascotasporEspecie);
+        mascotasporEspecie.setLayout(mascotasporEspecieLayout);
+        mascotasporEspecieLayout.setHorizontalGroup(
+            mascotasporEspecieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 546, Short.MAX_VALUE)
+        );
+        mascotasporEspecieLayout.setVerticalGroup(
+            mascotasporEspecieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 258, Short.MAX_VALUE)
+        );
+
+        mascota.addTab("Mascotas por Especie", mascotasporEspecie);
+
+        listaMascotas.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane1.setViewportView(listaMascotas);
+
+        exportarMascotas.setText("Exportar");
+        exportarMascotas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportarMascotasActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout reporteMascotasLayout = new javax.swing.GroupLayout(reporteMascotas);
+        reporteMascotas.setLayout(reporteMascotasLayout);
+        reporteMascotasLayout.setHorizontalGroup(
+            reporteMascotasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(reporteMascotasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, reporteMascotasLayout.createSequentialGroup()
+                .addContainerGap(240, Short.MAX_VALUE)
+                .addComponent(exportarMascotas)
+                .addGap(232, 232, 232))
+        );
+        reporteMascotasLayout.setVerticalGroup(
+            reporteMascotasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(reporteMascotasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addComponent(exportarMascotas)
+                .addContainerGap())
+        );
+
+        mascota.addTab("Reporte Mascotas", reporteMascotas);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(mascota)
-                .addContainerGap())
+                .addComponent(mascota))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(mascota, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(mascota, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -593,6 +710,20 @@ public class Vista extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_TelefonoClienteActionPerformed
 
+    private void refrescarGraficaMascotaporEspecie() {
+        LinkedList<MascotasporEspecie> reporte = CtMascota.buscarEspecieMascotas();
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        for (MascotasporEspecie registro : reporte) {
+            dataset.setValue(registro.getEspecie(), registro.getCantidadMascotasporEspecie());
+        }
+        JFreeChart chart = ChartFactory.createPieChart("Mascotas por Especie", dataset, true, true, true);
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setMouseWheelEnabled(true);
+        mascotasporEspecie.setLayout(new java.awt.BorderLayout());
+        mascotasporEspecie.add(panel, BorderLayout.CENTER);
+        mascotasporEspecie.validate();
+
+    }
     private void btnCrearPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearPlanActionPerformed
         // TODO add your handling code here:
         String codigo = codigoPlan.getText();
@@ -606,6 +737,7 @@ public class Vista extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "No se pudo agregar el registro a la base de datos");
         }
         limpiarPlan();
+
 
     }//GEN-LAST:event_btnCrearPlanActionPerformed
 
@@ -647,6 +779,7 @@ public class Vista extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Debe buscar el registro para actualizar");
         }
         limpiarPlan();
+
     }//GEN-LAST:event_btnModificarPlanActionPerformed
 
     private void btnLimpiarPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarPlanActionPerformed
@@ -671,6 +804,7 @@ public class Vista extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "No se pudo borrar");
         }
         limpiarPlan();
+
     }//GEN-LAST:event_btnBorrarPlanActionPerformed
 
     private void btnCrearClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearClienteActionPerformed
@@ -705,15 +839,33 @@ public class Vista extends javax.swing.JFrame {
 
         if (this.CtMascota.crearMascota(m)) {
             JOptionPane.showMessageDialog(this, "La mascota fue agregada a la base de datos");
+            llenarListaMascotas();
+
         } else {
             JOptionPane.showMessageDialog(this, "No se pudo agregar la mascota a la base de datos");
         }
         limpiarMascota();
     }//GEN-LAST:event_btnCrearMascotaActionPerformed
 
+
     private void btnCrearPagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearPagoActionPerformed
         // TODO add your handling code here:
-        
+        String fechaPag = fechaPago.getText();
+        int numCuotas = Integer.parseInt(numeroCuotas.getText());
+        String mascotaSeleccionada = pagoMascota.getSelectedItem().toString();
+        int primerEspacio = mascotaSeleccionada.indexOf(" ");
+        int idFkMascota = Integer.parseInt(mascotaSeleccionada.substring(0, primerEspacio));
+        String planSeleccionado = pagoPlan.getSelectedItem().toString();
+        primerEspacio = planSeleccionado.indexOf(" ");
+        int idFKPlan = Integer.parseInt(planSeleccionado.substring(0, primerEspacio));
+        Pago p = new Pago(fechaPag, numCuotas, idFkMascota, idFKPlan);
+
+        if (this.CtPago.crearPago(p)) {
+            JOptionPane.showMessageDialog(this, "El pago fue agregado a la base de datos");
+        } else {
+            JOptionPane.showMessageDialog(this, "No se pudo agregar el pago a la base de datos");
+        }
+        limpiarPago();
     }//GEN-LAST:event_btnCrearPagoActionPerformed
 
     private void pagoMascotaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pagoMascotaActionPerformed
@@ -809,8 +961,7 @@ public class Vista extends javax.swing.JFrame {
                 especieMascota.setSelectedIndex(1);
             }
             int indice = 0;
-            System.out.println("el id del cliente es: "+m.getIdCliente());
-            
+
             for (Cliente cl : clienteComboBox) {
                 if (cl.getIdPk() == m.getIdCliente()) {
                     cbCliente.setSelectedIndex(indice);
@@ -836,22 +987,21 @@ public class Vista extends javax.swing.JFrame {
         int primerEspacio = clienteSeleccionado.indexOf(" ");
         int idFkCliente = Integer.parseInt(clienteSeleccionado.substring(0, primerEspacio));
         Mascota m = new Mascota(codigo, nombre, annio, peso, especie, idFkCliente);
-        
+
         try {
             boolean respuesta = CtMascota.actualizarMascota(m);
             if (respuesta) {
                 JOptionPane.showMessageDialog(this, "Registro actualizado correctamente");
                 limpiarMascota();
+                llenarListaMascotas();
             } else {
                 JOptionPane.showMessageDialog(this, "Registro no actualizado");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Debe buscar el registro para actualizar");
         }
-        
-        
-        
     }//GEN-LAST:event_btnModificarMascotaActionPerformed
+
 
     private void btnBorrarMascotaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarMascotaActionPerformed
         // TODO add your handling code here:
@@ -864,21 +1014,165 @@ public class Vista extends javax.swing.JFrame {
         int primerEspacio = clienteSeleccionado.indexOf(" ");
         int idFkCliente = Integer.parseInt(clienteSeleccionado.substring(0, primerEspacio));
         Mascota m = new Mascota(codigo, nombre, annio, peso, especie, idFkCliente);
-        
+
         try {
             boolean respuesta = CtMascota.borrarMascota(m);
             if (respuesta) {
                 JOptionPane.showMessageDialog(this, "Cliente borrado correctamente");
+                llenarListaMascotas();
             } else {
                 JOptionPane.showMessageDialog(this, "Cliente no borrado");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "No se pudo borrar");
         }
-        limpiarClientes();
+        limpiarMascota();
         recargarComboBoxCliente();
-        
     }//GEN-LAST:event_btnBorrarMascotaActionPerformed
+
+    private void btnConsultarPagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConsultarPagoActionPerformed
+        // TODO add your handling code here:
+        String id = idPago.getText();
+        Pago p = CtPago.buscarPago(id);
+        if (p == null) {
+            JOptionPane.showMessageDialog(this, "Pago no encontrado");
+            limpiarMascota();
+        } else {
+            fechaPago.setText(p.getFechaPago());
+            numeroCuotas.setText(String.valueOf(p.getNumeroCuotas()));
+
+            int indice = 0;
+
+            for (Mascota m : mascotaComboBox) {
+                if (m.getIdPk() == p.getIdMascota()) {
+                    pagoMascota.setSelectedIndex(indice);
+                }
+                indice++;
+            }
+            indice = 0;
+            for (Plan pl : planComboBox) {
+                if (pl.getIdPk() == p.getIdPlan()) {
+                    pagoPlan.setSelectedIndex(indice);
+                }
+                indice++;
+            }
+        }
+
+    }//GEN-LAST:event_btnConsultarPagoActionPerformed
+
+    private void btnLimpiarPagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarPagoActionPerformed
+        // TODO add your handling code here:
+        limpiarPago();
+    }//GEN-LAST:event_btnLimpiarPagoActionPerformed
+
+    private void btnModificarPagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarPagoActionPerformed
+        // TODO add your handling code here:
+        String fecha = fechaPago.getText();
+        int numCuotas = Integer.parseInt(numeroCuotas.getText());
+
+        String mascotaSeleccionada = pagoMascota.getSelectedItem().toString();
+        int primerEspacio = mascotaSeleccionada.indexOf(" ");
+        int idFkMascota = Integer.parseInt(mascotaSeleccionada.substring(0, primerEspacio));
+        String planSeleccionado = pagoPlan.getSelectedItem().toString();
+        primerEspacio = planSeleccionado.indexOf(" ");
+        int idFkPlan = Integer.parseInt(planSeleccionado.substring(0, primerEspacio));
+
+        Pago p = new Pago(fecha, numCuotas, idFkMascota, idFkPlan);
+        p.setIdPk(Integer.parseInt(idPago.getText()));
+
+        try {
+            boolean respuesta = CtPago.actualizarPago(p);
+            if (respuesta) {
+                JOptionPane.showMessageDialog(this, "Registro actualizado correctamente");
+                limpiarPago();
+            } else {
+                JOptionPane.showMessageDialog(this, "Registro no actualizado");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Debe buscar el registro para actualizar");
+        }
+    }//GEN-LAST:event_btnModificarPagoActionPerformed
+
+    private void btnBorrarPagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarPagoActionPerformed
+        // TODO add your handling code here:
+        int idPk = Integer.parseInt(idPago.getText());
+        String fechaPag = fechaPago.getText();
+        int numCuotas = Integer.parseInt(numeroCuotas.getText());
+        String mascotaSeleccionada = pagoMascota.getSelectedItem().toString();
+        int primerEspacio = mascotaSeleccionada.indexOf(" ");
+        int idFkMascota = Integer.parseInt(mascotaSeleccionada.substring(0, primerEspacio));
+        String planSeleccionado = pagoPlan.getSelectedItem().toString();
+        primerEspacio = planSeleccionado.indexOf(" ");
+        int idFKPlan = Integer.parseInt(planSeleccionado.substring(0, primerEspacio));
+        Pago p = new Pago(fechaPag, numCuotas, idFkMascota, idFKPlan);
+        p.setIdPk(idPk);
+
+        try {
+            boolean respuesta = CtPago.borrarPago(p);
+            if (respuesta) {
+                JOptionPane.showMessageDialog(this, "Pago borrado correctamente");
+            } else {
+                JOptionPane.showMessageDialog(this, "Pago no borrado");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No se pudo borrar");
+        }
+        limpiarMascota();
+        recargarComboBoxCliente();
+    }//GEN-LAST:event_btnBorrarPagoActionPerformed
+
+    private void exportarMascotasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportarMascotasActionPerformed
+        // TODO add your handling code here:
+        HSSFWorkbook book = new HSSFWorkbook();
+        HSSFSheet sheet = book.createSheet();
+        book.setSheetName(0, "Mascotas");
+        String[] encabezados = new String[]{
+            "Codigo",
+            "Nombre",
+            "Año Nac",
+            "Peso",
+            "Especie",};
+        CellStyle estiloEncabezados = book.createCellStyle();
+        HSSFFont font = book.createFont();
+        font.setBold(true);
+        estiloEncabezados.setFont(font);
+
+        HSSFRow encabezadosFila = sheet.createRow(0);
+        for (int i = 0; i < encabezados.length; i++) {
+            String encabezado = encabezados[i];
+            HSSFCell cell = encabezadosFila.createCell(i);
+            cell.setCellStyle(estiloEncabezados);
+            cell.setCellValue(encabezado);
+        }
+        for (int i = 0; i < mascotaComboBox.size(); i++) {
+
+            HSSFRow fila = sheet.createRow(i + 1);
+            String codigo = mascotaComboBox.get(i).getCodigo();
+            String nombre = mascotaComboBox.get(i).getNombre();
+            int annio = mascotaComboBox.get(i).getAnnioNac();
+            int peso = mascotaComboBox.get(i).getPeso();
+            String especie = mascotaComboBox.get(i).getEspecie();
+
+            fila.createCell(0).setCellValue(codigo);
+            fila.createCell(1).setCellValue(nombre);
+            fila.createCell(2).setCellValue(annio);
+            fila.createCell(3).setCellValue(peso);
+            fila.createCell(4).setCellValue(especie);
+        }
+        try {
+            FileOutputStream archivo = new FileOutputStream("Lista Mascotas.xls");
+            book.write(archivo);
+            archivo.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Vista.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Vista.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_exportarMascotasActionPerformed
+
+    private void especieMascotaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_especieMascotaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_especieMascotaActionPerformed
 
     private void limpiarClientes() {
         IdentificacionCliente.setText("");
@@ -903,12 +1197,18 @@ public class Vista extends javax.swing.JFrame {
         cbCliente.setSelectedIndex(0);
     }
 
+    private void limpiarPago() {
+        idPago.setText("");
+        fechaPago.setText("");
+        numeroCuotas.setText("");
+        pagoMascota.setSelectedIndex(0);
+        pagoPlan.setSelectedIndex(0);
+    }
+
     private void recargarComboBoxCliente() {
         cbCliente.removeAllItems();
-
         this.clienteComboBox = CtCliente.listarTodosClientes();
         int contador = 0;
-
         while (contador < clienteComboBox.size()) {
             String tempNombre;
             tempNombre = clienteComboBox.get(contador).getIdPk() + " " + clienteComboBox.get(contador).getidentificacion() + " " + clienteComboBox.get(contador).getNombres() + " " + clienteComboBox.get(contador).getApellidos();
@@ -916,25 +1216,44 @@ public class Vista extends javax.swing.JFrame {
             cbCliente.addItem(tempNombre);
             contador = contador + 1;
         }
-
     }
-    
-    private void recargarComboBoxMascota(){
+
+    private void recargarComboBoxMascota() {
         pagoMascota.removeAllItems();
-        
         this.mascotaComboBox = CtMascota.listarTodosMascotas();
         int contador = 0;
-        while (contador < mascotaComboBox.size()){
+        while (contador < mascotaComboBox.size()) {
             String tempNombre;
-            tempNombre=mascotaComboBox.get(contador).getIdPk() + " " + mascotaComboBox.get(contador).getNombre();
-            
+            tempNombre = mascotaComboBox.get(contador).getIdPk() + " " + mascotaComboBox.get(contador).getNombre();
+
             pagoMascota.addItem(tempNombre);
             contador++;
         }
     }
-    
-    private void recargarComboBoxPlan(){
-    
+
+    private void recargarComboBoxPlan() {
+        pagoPlan.removeAllItems();
+        this.planComboBox = CtPlan.listarTodosPlan();
+        int contador = 0;
+        while (contador < planComboBox.size()) {
+            String tempNombre;
+            tempNombre = planComboBox.get(contador).getIdPk() + " " + planComboBox.get(contador).getNombre();
+
+            pagoPlan.addItem(tempNombre);
+            contador++;
+        }
+    }
+
+    private void llenarListaMascotas() {
+        listaMascotas.removeAll();
+        DefaultListModel model = new DefaultListModel();
+        int index = 0;
+        for (Mascota m : mascotaComboBox) {
+            String data = m.getCodigo() + " - " + m.getNombre() + " - " + m.getAnnioNac() + " - " + m.getPeso() + " - " + m.getEspecie();
+            model.add(index, data);
+            index++;
+        }
+        listaMascotas.setModel(model);
     }
 
     /**
@@ -1003,7 +1322,9 @@ public class Vista extends javax.swing.JFrame {
     private javax.swing.JTextField codigoMascota;
     private javax.swing.JTextField codigoPlan;
     private javax.swing.JComboBox<String> especieMascota;
+    private javax.swing.JButton exportarMascotas;
     private javax.swing.JTextField fechaPago;
+    private javax.swing.JTextField idPago;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1014,7 +1335,9 @@ public class Vista extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1026,7 +1349,10 @@ public class Vista extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelMascota;
     private javax.swing.JPanel jPanelPago;
     private javax.swing.JPanel jPanelPlan;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JList<String> listaMascotas;
     private javax.swing.JTabbedPane mascota;
+    private javax.swing.JPanel mascotasporEspecie;
     private javax.swing.JTextField nombreMascota;
     private javax.swing.JComboBox<String> nombrePlan;
     private javax.swing.JTextField numeroCuotas;
@@ -1034,6 +1360,7 @@ public class Vista extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> pagoPlan;
     private javax.swing.JTextField pesoMascota;
     private javax.swing.JTextField precioPlan;
+    private javax.swing.JPanel reporteMascotas;
     // End of variables declaration//GEN-END:variables
 
 }
